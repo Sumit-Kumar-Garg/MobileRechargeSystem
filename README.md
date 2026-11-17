@@ -1,6 +1,7 @@
 # Mobile Recharge System
 
 [![backend-ci](https://github.com/Sumit-Kumar-Garg/MobileRechargeSystem/actions/workflows/ci.yml/badge.svg)](https://github.com/Sumit-Kumar-Garg/MobileRechargeSystem/actions/workflows/ci.yml)
+[![mobile-ci](https://github.com/Sumit-Kumar-Garg/MobileRechargeSystem/actions/workflows/mobile-ci.yml/badge.svg)](https://github.com/Sumit-Kumar-Garg/MobileRechargeSystem/actions/workflows/mobile-ci.yml)
 
 A mobile recharge and top-up system. Customers link their phone numbers, browse prepaid plans, pay, and get the
 top-up applied to their number.

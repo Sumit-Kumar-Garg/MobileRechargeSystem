@@ -24,7 +24,7 @@ class PhoneNumberValidatorTest {
 
     @Test fun rejectsGarbage() {
         listOf("", "abc", "1234567", "+49abc", "+49 1", "++491701234567").forEach {
-            assertEquals(it, PhoneValidation.Reason.FORMAT, invalid(it))
+            assertEquals(PhoneValidation.Reason.FORMAT, invalid(it), it)
         }
     }
 
@@ -37,20 +37,20 @@ class PhoneNumberValidatorTest {
 class OrderStatusTest {
     @Test fun settledStatesStopPolling() {
         listOf(OrderStatus.COMPLETED, OrderStatus.REFUNDED, OrderStatus.EXPIRED, OrderStatus.PAYMENT_FAILED)
-            .forEach { assertTrue(it.name, it.settled) }
+            .forEach { assertTrue(it.settled, it.name) }
     }
 
     @Test fun inFlightStatesKeepPolling() {
         listOf(OrderStatus.CREATED, OrderStatus.PAYMENT_PENDING, OrderStatus.PAID, OrderStatus.PROVISIONING,
             OrderStatus.PROVISIONING_FAILED, OrderStatus.REFUND_INITIATED, OrderStatus.UNKNOWN)
-            .forEach { assertFalse(it.name, it.settled) }
+            .forEach { assertFalse(it.settled, it.name) }
     }
 
     @Test fun onlyCreatedAndFailedOrdersAcceptPayment() {
         assertTrue(OrderStatus.CREATED.payable)
         assertTrue(OrderStatus.PAYMENT_FAILED.payable)
         OrderStatus.entries.filter { it != OrderStatus.CREATED && it != OrderStatus.PAYMENT_FAILED }
-            .forEach { assertFalse(it.name, it.payable) }
+            .forEach { assertFalse(it.payable, it.name) }
     }
 
     @Test fun unknownApiValuesMapToUnknown() {

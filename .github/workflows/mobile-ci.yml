@@ -1,0 +1,29 @@
+name: mobile-ci
+on:
+  push:
+    paths: ['mobile/**', '.github/workflows/mobile-ci.yml']
+  pull_request:
+    paths: ['mobile/**', '.github/workflows/mobile-ci.yml']
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      # Shared module tests on the JVM, then the Android debug app. iOS targets are skipped on Linux
+      # (kotlin.native.ignoreDisabledTargets in gradle.properties).
+      - name: Test and build
+        run: ./gradlew --console=plain :shared:testDebugUnitTest :androidApp:assembleDebug
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-test-reports
+          path: mobile/shared/build/reports/tests

@@ -3,9 +3,11 @@
 One Kotlin Multiplatform project. All logic and all screens are written once in the `shared` module and run on
 Android and iOS. The UI is Compose Multiplatform. It talks to the Recharge backend.
 
-> **Status:** this project has not been built or run yet (tasks T-107 and T-108 in `recharge-specs/13-tasks.md`).
-> The code was checked for syntax and for unresolved project imports only. Expect to fix some compile errors on the
-> first build; the most likely places are listed at the end of this file.
+[![mobile-ci](https://github.com/Sumit-Kumar-Garg/MobileRechargeSystem/actions/workflows/mobile-ci.yml/badge.svg)](https://github.com/Sumit-Kumar-Garg/MobileRechargeSystem/actions/workflows/mobile-ci.yml)
+
+> **Status:** Android builds and runs, and all 158 shared tests pass on the JVM. CI checks both on every change
+> under `mobile/`. iOS has not been built yet (it needs Xcode); the likely first-build fixes are at the end of
+> this file.
 
 ## What is shared and what is not
 | Part | Where | Android | iOS |
@@ -62,7 +64,8 @@ iosApp/                  SwiftUI shell and project.yml (the Xcode project is gen
 4. A real iPhone: change `backendUrl` in `iosApp/iosApp/ContentView.swift` to the Mac's address on the local
    network, and select your development team under Signing in Xcode.
 
-Java 17 must be installed for Gradle on both platforms.
+Gradle needs Java 17 or 21 on both platforms (Gradle 8.9 does not run on newer versions). In Android Studio,
+set it under Settings > Build Tools > Gradle > Gradle JDK.
 
 ## Tests
 ```bash
@@ -85,12 +88,13 @@ recorder and uploader, and the small helpers.
 | Push opens the order | Push opens the app | deep link to be added again (T-111) |
 | `strings.xml` | Compose resources | `Res.string.<name>`; placeholders are written `%1$d` |
 
-## Where the first build is most likely to need fixes
-1. Generated names: `Res.string.*` (package `com.app.recharge.resources`) and the SQLDelight classes
-   (`com.app.recharge.db.TelemetryDatabase`, `telemetryQueueQueries`).
-2. Multiplatform navigation and lifecycle (`navigation-compose 2.8.0-alpha10`, `lifecycle 2.8.3`): type-safe routes,
-   `viewModel { }`, `LifecycleEventEffect`.
-3. iOS interop in `shared/src/iosMain`: `NWPathMonitor` in `IosNetworkMonitor`, `KeychainSettings` and
+## Continuous integration
+`.github/workflows/mobile-ci.yml` (at the repository root) runs on every push and pull request that changes
+`mobile/`: it runs `:shared:testDebugUnitTest` and builds `:androidApp:assembleDebug` on Linux with Java 17.
+iOS is not built in CI yet. Add a macOS job running `:shared:iosSimulatorArm64Test` once the iOS side builds.
+
+## Where the iOS build is most likely to need fixes
+The shared code already compiles for Android, so what is left is iOS-specific:
+1. iOS interop in `shared/src/iosMain`: `NWPathMonitor` in `IosNetworkMonitor`, `KeychainSettings` and
    `NSNumberFormatter` in `IosPlatform`.
-4. The XcodeGen project: framework search path and linker flags in `iosApp/project.yml`.
-5. Library versions in `gradle/libs.versions.toml` must match each other (Kotlin 2.0.20, Compose Multiplatform 1.7.0).
+2. The XcodeGen project: framework search path and linker flags in `iosApp/project.yml`.

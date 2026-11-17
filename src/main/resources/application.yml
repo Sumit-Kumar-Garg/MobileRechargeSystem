@@ -1,0 +1,198 @@
+spring:
+  application:
+    name: recharge-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/recharge}
+    username: ${DB_USER:recharge}
+    password: ${DB_PASSWORD:recharge}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+      connection-timeout: ${DB_CONNECTION_TIMEOUT_MS:3000}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate          # schema is owned by Flyway, never by Hibernate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    locations: classpath:db/migration
+  cache:
+    type: caffeine              # explicit: with Redis on the classpath Boot would otherwise pick Redis for @Cacheable
+    cache-names: plans
+    caffeine:
+      spec: ${PLANS_CACHE_SPEC:maximumSize=500,expireAfterWrite=5m}
+  lifecycle:
+    timeout-per-shutdown-phase: ${SHUTDOWN_TIMEOUT:20s}
+  threads:
+    virtual:
+      enabled: true               # request threads are cheap: a slow dependency cannot exhaust a fixed pool
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}        # empty = no AUTH (local only)
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    producer:
+      acks: all
+      retries: 3
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        delivery.timeout.ms: 30000
+    consumer:
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: record
+      observation-enabled: true
+    template:
+      observation-enabled: true
+
+server:
+  shutdown: graceful
+  max-http-request-header-size: 16KB
+  forward-headers-strategy: framework   # only safe behind a trusted gateway that sets X-Forwarded-*
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+
+management:
+  server:
+    port: ${MANAGEMENT_PORT:8081}   # health and metrics are not served on the public port
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    redis:
+      enabled: false
+  tracing:
+    sampling:
+      probability: ${TRACE_SAMPLING:0.1}
+  otlp:
+    tracing:
+      endpoint: ${OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 100ms,250ms,500ms,1s,2s
+
+springdoc:
+  api-docs:
+    enabled: ${OPENAPI_ENABLED:false}
+  swagger-ui:
+    enabled: ${OPENAPI_ENABLED:false}
+
+app:
+  security:
+    jwk-set-uri: ${JWKS_URI:}           # production: the identity provider's JWKS endpoint
+    audience: ${JWT_AUDIENCE:}          # production: expected "aud" claim
+    jwt-secret: ${JWT_SECRET:}          # demo/tests only (>= 32 bytes), used when jwk-set-uri is empty
+    issuer: ${JWT_ISSUER:recharge-demo}
+  crypto:
+    aes-key: ${PII_AES_KEY:}            # base64 of 32 bytes
+    aes-key-id: ${PII_AES_KEY_ID:1}     # raise when rotating; list the old key under previous-aes-keys
+    hmac-key: ${PII_HMAC_KEY:}          # base64 of >= 32 bytes
+  # Durations below accept 15m / 10s style, EXCEPT the scheduler delays marked "ISO-8601" (PT15S, PT15M):
+  # Spring 6.1's @Scheduled only parses milliseconds or ISO-8601.
+  order:
+    ttl: ${ORDER_TTL:15m}                               # unpaid orders expire after this
+    max-payment-attempts: ${ORDER_MAX_PAYMENT_ATTEMPTS:3}
+  provisioning:
+    max-attempts: ${PROVISIONING_MAX_ATTEMPTS:3}        # then the customer is refunded
+    stale-after: ${PROVISIONING_STALE_AFTER:2m}
+    base-backoff: ${PROVISIONING_BASE_BACKOFF:5s}       # doubled per attempt
+    worker-delay: ${PROVISIONING_WORKER_DELAY:PT15S}    # ISO-8601
+    executor:                                           # runs provisioning right after a payment commits
+      core-size: ${PROVISIONING_EXECUTOR_CORE_SIZE:2}
+      max-size: ${PROVISIONING_EXECUTOR_MAX_SIZE:8}
+      queue-capacity: ${PROVISIONING_EXECUTOR_QUEUE_CAPACITY:200}
+  reconciliation:
+    delay: ${RECONCILIATION_DELAY:PT60S}                # ISO-8601
+    pending-min-age: ${RECONCILIATION_PENDING_MIN_AGE:60s}   # unknown payment outcomes are checked after this
+    not-found-grace: ${RECONCILIATION_NOT_FOUND_GRACE:10m}   # wait before voiding a charge the PSP does not know. Shorter = double-charge risk
+    lease: ${RECONCILIATION_LEASE:5m}
+  numbers:
+    max-per-user: ${NUMBERS_MAX_PER_USER:3}             # phone numbers one user may link
+  retention:
+    cron: "${RETENTION_CRON:0 30 3 * * *}"              # daily clean-up of old analytics and outbox rows
+  psp:
+    mode: ${PSP_MODE:none}              # none | mock. The mock keeps state in memory: demo and tests only
+    timeout: ${PSP_TIMEOUT:10s}
+    max-concurrent: ${PSP_MAX_CONCURRENT:50}
+  ocs:
+    mode: ${OCS_MODE:none}              # none | mock. With none, a real adapter must be enabled or startup fails
+    timeout: ${OCS_TIMEOUT:10s}
+    max-concurrent: ${OCS_MAX_CONCURRENT:30}
+  payment:
+    provider-priority: ${PAYMENT_PROVIDER_PRIORITY:mockpay,altpay}   # first available provider that supports the payment wins
+  providers:                        # each provider adapter is switched on by its owning team's flag
+    altpay:
+      enabled: ${ALTPAY_ENABLED:false}
+    travelsim:
+      enabled: ${TRAVELSIM_ENABLED:false}
+  catalog:
+    sync-delay: ${CATALOG_SYNC_DELAY:PT15M}                    # ISO-8601
+    sync-initial-delay: ${CATALOG_SYNC_INITIAL_DELAY:PT10S}    # ISO-8601
+    cache-refresh:      # every instance clears its local plans cache when the catalog changes
+      enabled: ${PLANS_CACHE_REFRESH_ENABLED:true}
+      delay: ${PLANS_CACHE_REFRESH_DELAY:PT10S}                # ISO-8601
+  advisor:                              # the AI recharge advisor (agent). The model is called by the backend only
+    llm: ${ADVISOR_LLM:none}            # none (rules only) | openai-compatible | scripted (demo and tests)
+    base-url: ${ADVISOR_LLM_BASE_URL:}  # for example an internal gateway: https://llm.example.internal/v1
+    api-key: ${ADVISOR_LLM_API_KEY:}    # secret; lives on the server, never in the app
+    model: ${ADVISOR_LLM_MODEL:}
+    max-steps: ${ADVISOR_MAX_STEPS:6}
+    call-timeout: ${ADVISOR_CALL_TIMEOUT:20s}
+    max-concurrent: ${ADVISOR_MAX_CONCURRENT:10}
+    max-output-tokens: ${ADVISOR_MAX_OUTPUT_TOKENS:400}
+    advice-ttl: ${ADVISOR_ADVICE_TTL:24h}
+    runs-per-user-per-day: ${ADVISOR_RUNS_PER_USER_PER_DAY:5}
+  kafka:
+    enabled: ${KAFKA_ENABLED:true}
+    partitions: ${KAFKA_PARTITIONS:6}
+    replicas: ${KAFKA_REPLICAS:1}                       # production: 3
+  outbox:
+    publisher:
+      enabled: ${OUTBOX_PUBLISHER_ENABLED:true}
+      delay: ${OUTBOX_PUBLISHER_DELAY:PT1S}             # ISO-8601
+  workers:
+    enabled: ${WORKERS_ENABLED:true}                    # background jobs; each still runs on one instance at a time
+  ratelimit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+    store: ${RATE_LIMIT_STORE:memory}   # memory (one instance only) | redis (required with several instances)
+    global-per-minute: ${RATE_LIMIT_GLOBAL_PER_MINUTE:120}   # all requests of one user or IP
+    policies:                                           # per endpoint, per user (or IP when anonymous)
+      orders-create:   { limit: "${RATE_LIMIT_ORDERS_CREATE_LIMIT:10}",   window: "${RATE_LIMIT_ORDERS_CREATE_WINDOW:1h}" }
+      orders-pay:      { limit: "${RATE_LIMIT_ORDERS_PAY_LIMIT:10}",      window: "${RATE_LIMIT_ORDERS_PAY_WINDOW:1h}" }
+      numbers-link:    { limit: "${RATE_LIMIT_NUMBERS_LINK_LIMIT:5}",     window: "${RATE_LIMIT_NUMBERS_LINK_WINDOW:1d}" }
+      recommendations: { limit: "${RATE_LIMIT_RECOMMENDATIONS_LIMIT:20}", window: "${RATE_LIMIT_RECOMMENDATIONS_WINDOW:1h}" }
+      telemetry:       { limit: "${RATE_LIMIT_TELEMETRY_LIMIT:60}",       window: "${RATE_LIMIT_TELEMETRY_WINDOW:1m}" }
+      devices-put:     { limit: "${RATE_LIMIT_DEVICES_PUT_LIMIT:20}",     window: "${RATE_LIMIT_DEVICES_PUT_WINDOW:1h}" }
+      devices-delete:  { limit: "${RATE_LIMIT_DEVICES_DELETE_LIMIT:20}",  window: "${RATE_LIMIT_DEVICES_DELETE_WINDOW:1h}" }
+    failed-payments:                                    # card-testing lockout
+      max: ${FAILED_PAYMENTS_MAX:5}
+      window: ${FAILED_PAYMENTS_WINDOW:1h}
+    request-size:
+      max-body: ${REQUEST_MAX_BODY:16KB}
+      max-telemetry-body: ${REQUEST_MAX_TELEMETRY_BODY:256KB}
+  notification:
+    provider: ${NOTIFICATION_PROVIDER:log}       # log (development) | a real adapter
+    max-sms-per-day: ${NOTIFICATION_MAX_SMS_PER_DAY:5}           # per user: SMS cost cap
+    max-active-devices: ${NOTIFICATION_MAX_ACTIVE_DEVICES:5}     # push devices per user
+
+logging:
+  pattern:
+    level: "%5p [cid=%X{correlationId:-},trace=%X{traceId:-}]"

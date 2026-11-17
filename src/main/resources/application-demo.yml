@@ -1,0 +1,27 @@
+# Demo profile: seed data, dev-only secrets, API docs. NEVER enable in production.
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/demo
+app:
+  security:
+    jwt-secret: dev-only-secret-change-me-0123456789abcdef
+  psp:
+    mode: mock                # in-memory payment provider
+  ocs:
+    mode: mock                # in-memory billing system
+  advisor:
+    llm: scripted             # a built-in stand-in for the model, so the demo needs no API key
+  providers:
+    altpay:
+      enabled: true
+    travelsim:
+      enabled: true
+  crypto:
+    aes-key: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+    hmac-key: ZmVkY2JhOTg3NjU0MzIxMGZlZGNiYTk4NzY1NDMyMTA=
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    persist-authorization: true   # keep the pasted token across page reloads

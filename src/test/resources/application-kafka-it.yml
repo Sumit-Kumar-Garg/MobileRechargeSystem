@@ -1,0 +1,22 @@
+# Used only by KafkaFlowIT: real Kafka, outbox publisher on, background workers off.
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+app:
+  advisor:
+    llm: none
+  kafka:
+    enabled: true
+    partitions: 3
+  outbox:
+    publisher:
+      enabled: true
+      delay: PT0.2S
+  workers:
+    enabled: false
+management:
+  tracing:
+    sampling:
+      probability: 0.0

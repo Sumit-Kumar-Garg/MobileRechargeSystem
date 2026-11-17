@@ -1,0 +1,20 @@
+---
+description: Conventions for the recharge backend (Spring Boot)
+globs: ["**/*.java", "**/*.sql", "**/*.yml"]
+alwaysApply: true
+---
+- Java 21, Spring Boot 3.3, Postgres, Kafka. Modular monolith: one package per domain. Other packages use a module's public services and DTOs, never its repositories (enforced by ArchitectureTest). Orders: read/lock through `OrderStore`, change status or failure code only through `OrderTransitions`. Payments and refunds: `PaymentService`, `RefundService`. Lock order: order row first, then payment row. Provider calls go through `OutboundGuard` (Resilience4j bulkhead, time limiter, circuit breaker). The AI advisor (`recommendation/agent`) is the only code that may call a language model, always through `LlmGateway`; its tools are read-only, take no identifiers from the model, and its output is validated against the catalog before use. It runs in the background, never on a request thread. Mock providers are demo/test only (`app.psp.mode`, `app.ocs.mode`).
+- Schema changes only through Flyway migrations (never edit an applied migration). Hibernate ddl-auto stays `validate`.
+- Money is integer minor units + ISO currency. Never float/double. Time is `Instant` via the injected `Clock`.
+- Never trust client input for price, status, or user identity. Identity comes from the JWT, price from the server-side plan snapshot.
+- Idempotency is enforced by DB unique constraints, not check-then-insert alone. A failed Postgres transaction cannot be reused: catch unique violations outside the transaction.
+- All order state changes go through `OrderTransitions.apply` and `OrderStatus.canMoveTo`.
+- Never hold a database transaction open across a network call (PSP, OCS, Kafka, SMS).
+- Errors: throw `BusinessException(ErrorCode, safeMessage)`. Responses are RFC 7807 with `code` and `correlationId`. Never return stack traces.
+- Never log or emit PII (number, email, token). Use `Msisdn.mask`. Events and analytics carry masked or pseudonymous data only.
+- Every outbound call has a timeout and a circuit breaker; retry only idempotent calls.
+- Metric tags are small closed sets. Never tag by user, order, number or free text.
+- Every class with logic gets a unit test; every endpoint is covered by an integration test (Testcontainers).
+- Ask before adding a dependency.
+- Providers: adapters live in `providers/<name>/`, implement a contract from an `spi` package, depend on nothing else in the project, are enabled by `app.providers.<name>.enabled`, and extend the contract test kit. Core code never imports an adapter. `ArchitectureTest` enforces this.
+- Payment follow-ups (lookup, cancel, refund) always use the provider stored on the payment. Never re-route an attempt with an unknown outcome.

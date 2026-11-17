@@ -1,0 +1,52 @@
+# Two app instances behind a load balancer, to run and test the service the way it is deployed:
+#   docker compose -f docker-compose.yml -f docker-compose.cluster.yml up -d --build
+#   ./scripts/demo-flow.sh http://localhost:8000
+# Settings come from .env (copy .env.example). Demo profile by default (seed data, dev secrets, in-memory mock
+# providers): not a production manifest.
+x-app: &app
+  image: recharge-backend:local
+  depends_on:
+    postgres:
+      condition: service_healthy
+    kafka:
+      condition: service_started
+    redis:
+      condition: service_started
+  env_file:                              # every app setting from .env (business rules, schedules, advisor, ...)
+    - path: .env
+      required: false
+  environment:                           # wins over env_file: addresses inside the compose network
+    SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-demo}
+    DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-recharge}
+    DB_USER: ${DB_USER:-recharge}
+    DB_PASSWORD: ${DB_PASSWORD:-recharge}
+    DB_POOL_SIZE: ${DB_POOL_SIZE:-5}     # per instance: instances x pool size must stay below Postgres max_connections
+    KAFKA_BOOTSTRAP: kafka:29092
+    REDIS_HOST: redis
+    REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    RATE_LIMIT_STORE: redis              # shared counters: limits hold across instances (required here)
+    TRACE_SAMPLING: ${TRACE_SAMPLING:-0}
+    # Secrets for non-demo profiles (the demo profile always uses its own dev-only values).
+    JWT_SECRET: ${JWT_SECRET:-}
+    JWKS_URI: ${JWKS_URI:-}
+    JWT_AUDIENCE: ${JWT_AUDIENCE:-}
+    PII_AES_KEY: ${PII_AES_KEY:-}
+    PII_HMAC_KEY: ${PII_HMAC_KEY:-}
+  # No published ports: only the load balancer can reach the instances, so X-Forwarded-For cannot be forged.
+  restart: unless-stopped
+
+services:
+  app1:
+    <<: *app
+    build: .                          # built once, here; app2 runs the same image
+  app2:
+    <<: *app
+    pull_policy: never                # never look for it in a registry: it is built locally by app1
+
+  lb:
+    image: nginx:1.27-alpine
+    depends_on: [app1, app2]
+    ports: ["${LB_PORT:-8000}:80"]
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped

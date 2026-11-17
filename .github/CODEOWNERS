@@ -1,0 +1,36 @@
+# Team ownership. A change needs a review from the owning team; a change to a contract (spi packages, the
+# OpenAPI/event contracts in the specs) needs the contract's owner AND its consumers.
+
+# Contracts
+/src/main/java/com/app/recharge/payment/spi/        @recharge/payments @recharge/provider-integrations
+/src/main/java/com/app/recharge/provisioning/spi/   @recharge/fulfilment @recharge/provider-integrations
+/src/main/java/com/app/recharge/catalog/spi/        @recharge/catalog @recharge/provider-integrations
+/src/test/java/com/app/recharge/**/spi/             @recharge/platform
+
+# Core domains
+/src/main/java/com/app/recharge/catalog/            @recharge/catalog
+/src/main/java/com/app/recharge/order/              @recharge/payments
+/src/main/java/com/app/recharge/payment/            @recharge/payments
+/src/main/java/com/app/recharge/reliability/        @recharge/payments
+/src/main/java/com/app/recharge/provisioning/       @recharge/fulfilment
+/src/main/java/com/app/recharge/number/             @recharge/identity
+
+# Provider adapters: one sub-package per provider, owned by the team that integrates it
+/src/main/java/com/app/recharge/providers/altpay/     @recharge/provider-altpay
+/src/main/java/com/app/recharge/providers/travelsim/  @recharge/provider-travelsim
+
+# Engagement and data
+/src/main/java/com/app/recharge/notification/       @recharge/engagement
+/src/main/java/com/app/recharge/recommendation/     @recharge/engagement
+/src/main/java/com/app/recharge/consent/            @recharge/engagement
+/src/main/java/com/app/recharge/telemetry/          @recharge/data
+
+# Platform
+/src/main/java/com/app/recharge/common/             @recharge/platform
+/src/main/java/com/app/recharge/security/           @recharge/platform
+/src/main/java/com/app/recharge/crypto/             @recharge/platform
+/src/main/java/com/app/recharge/ratelimit/          @recharge/platform
+/src/main/java/com/app/recharge/outbox/             @recharge/platform
+/src/main/java/com/app/recharge/observability/      @recharge/platform
+/src/main/resources/db/migration/                   @recharge/platform
+/src/test/java/com/app/recharge/architecture/       @recharge/platform

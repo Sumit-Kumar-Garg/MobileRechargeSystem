@@ -1,7 +1,7 @@
 ---
 description: Conventions for the recharge backend (Spring Boot)
-globs: ["**/*.java", "**/*.sql", "**/*.yml"]
-alwaysApply: true
+globs: ["backend/**"]
+alwaysApply: false
 ---
 - Java 21, Spring Boot 3.3, Postgres, Kafka. Modular monolith: one package per domain. Other packages use a module's public services and DTOs, never its repositories (enforced by ArchitectureTest). Orders: read/lock through `OrderStore`, change status or failure code only through `OrderTransitions`. Payments and refunds: `PaymentService`, `RefundService`. Lock order: order row first, then payment row. Provider calls go through `OutboundGuard` (Resilience4j bulkhead, time limiter, circuit breaker). The AI advisor (`recommendation/agent`) is the only code that may call a language model, always through `LlmGateway`; its tools are read-only, take no identifiers from the model, and its output is validated against the catalog before use. It runs in the background, never on a request thread. Mock providers are demo/test only (`app.psp.mode`, `app.ocs.mode`).
 - Schema changes only through Flyway migrations (never edit an applied migration). Hibernate ddl-auto stays `validate`.

@@ -1,0 +1,27 @@
+CREATE TABLE telemetry_queue (
+  id TEXT NOT NULL PRIMARY KEY,
+  type TEXT NOT NULL,
+  name TEXT NOT NULL,
+  occurred_at TEXT NOT NULL,
+  journey_id TEXT,
+  order_id TEXT,
+  props_json TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+
+insertEvent:
+INSERT OR IGNORE INTO telemetry_queue (id, type, name, occurred_at, journey_id, order_id, props_json, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+countEvents:
+SELECT COUNT(*) FROM telemetry_queue;
+
+oldest:
+SELECT * FROM telemetry_queue ORDER BY created_at ASC LIMIT ?;
+
+deleteByIds:
+DELETE FROM telemetry_queue WHERE id IN ?;
+
+deleteOldest:
+DELETE FROM telemetry_queue
+WHERE id IN (SELECT id FROM telemetry_queue ORDER BY created_at ASC LIMIT ?);

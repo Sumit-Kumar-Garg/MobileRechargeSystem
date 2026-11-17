@@ -1,0 +1,15 @@
+*.iml
+.gradle/
+local.properties
+.idea/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+app/google-services.json
+androidApp/google-services.json
+iosApp/iosApp.xcodeproj/
+iosApp/iosApp/Info.plist
+*.xcuserstate
+xcuserdata/
+.kotlin/

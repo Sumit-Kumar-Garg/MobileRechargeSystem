@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="number_title">Rufnummer aufladen</string>
+    <string name="number_hint">Rufnummer</string>
+    <string name="number_supporting">Beispiel: 0170 1234567 oder +49 170 1234567</string>
+    <string name="number_continue">Weiter</string>
+    <string name="number_error_invalid">Bitte gib eine gültige Rufnummer ein.</string>
+    <string name="number_error_unsupported">Dieses Land wird noch nicht unterstützt.</string>
+    <string name="number_error_limit">Du hast die maximale Anzahl verknüpfter Rufnummern erreicht.</string>
+
+    <string name="plans_title">Paket wählen</string>
+    <string name="plans_for_number">Für %1$s</string>
+    <string name="plan_recommended">Für dich empfohlen</string>
+    <string name="plan_cheaper_alternative">Günstigere Option</string>
+    <plurals name="plan_valid_days">
+        <item quantity="one">%1$d Tag gültig</item>
+        <item quantity="other">%1$d Tage gültig</item>
+    </plurals>
+    <string name="plan_data_mb">%1$s GB Datenvolumen</string>
+    <string name="plan_voice">%1$d Min. Telefonie</string>
+    <string name="plan_sms">%1$d SMS</string>
+    <string name="plan_select">Auswählen</string>
+    <string name="plans_empty">Aktuell sind keine Pakete verfügbar.</string>
+
+    <string name="pay_title">Bestätigen und bezahlen</string>
+    <string name="pay_summary">%1$s für %2$s</string>
+    <string name="pay_method">Zahlungsart (Demo)</string>
+    <string name="pay_method_success">Karte (genehmigt)</string>
+    <string name="pay_method_decline">Karte (abgelehnt)</string>
+    <string name="pay_method_timeout">Karte (Bank antwortet nicht)</string>
+    <string name="pay_button">%1$s bezahlen</string>
+    <string name="pay_processing">Zahlung wird verarbeitet…</string>
+    <string name="pay_declined">Deine Karte wurde abgelehnt. Du kannst eine andere Zahlungsart versuchen.</string>
+    <string name="pay_error_limit">Zu viele Versuche. Bitte versuche es später erneut.</string>
+    <string name="pay_error_expired">Diese Bestellung ist abgelaufen. Bitte starte neu.</string>
+
+    <string name="status_title">Deine Aufladung</string>
+    <string name="status_in_progress">Wir aktivieren dein Paket…</string>
+    <string name="status_pending_payment">Wir bestätigen deine Zahlung. Du wirst nicht doppelt belastet.</string>
+    <string name="status_completed">Aufladung erfolgreich</string>
+    <string name="status_completed_detail">%1$s ist bis %2$s aktiv.</string>
+    <string name="status_failed">Zahlung fehlgeschlagen</string>
+    <string name="status_refund">Wir konnten dein Paket nicht aktivieren. Dein Geld wird erstattet.</string>
+    <string name="status_refunded">Deine Zahlung wurde erstattet.</string>
+    <string name="status_expired">Diese Bestellung ist abgelaufen.</string>
+    <string name="status_new_recharge">Neue Aufladung</string>
+
+    <string name="banner_offline">Du bist offline. Verbinde dich, um fortzufahren.</string>
+    <string name="banner_slow">Langsame Verbindung. Es kann etwas länger dauern.</string>
+    <string name="action_retry">Erneut versuchen</string>
+    <string name="error_generic">Etwas ist schiefgelaufen. Bitte versuche es erneut.</string>
+    <string name="error_offline">Keine Internetverbindung.</string>
+    <string name="error_timeout">Die Anfrage hat zu lange gedauert. Bitte versuche es erneut.</string>
+
+    <string name="consent_title">Deine Datenschutz-Einstellungen</string>
+    <string name="consent_personalization">Personalisierte Paketempfehlungen</string>
+    <string name="consent_analytics">Anonyme Nutzungsdaten teilen, um die App zu verbessern</string>
+    <string name="consent_save">Speichern</string>
+</resources>

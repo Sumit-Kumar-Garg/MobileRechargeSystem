@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only what Android itself needs. All screen texts are shared: shared/src/commonMain/composeResources -->
+<resources>
+    <string name="app_name">Recharge</string>
+    <string name="notification_channel_name">Recharge receipts</string>
+    <string name="notification_channel_description">Confirmations for your recharges</string>
+</resources>

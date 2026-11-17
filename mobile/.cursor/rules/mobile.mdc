@@ -1,0 +1,18 @@
+---
+description: Conventions for the Recharge mobile app (Kotlin Multiplatform, Android and iOS)
+globs: ["**/*.kt", "**/*.kts", "**/*.xml", "**/*.swift", "**/*.sq"]
+alwaysApply: true
+---
+- Kotlin Multiplatform with Compose Multiplatform (Material 3), Ktor, kotlinx.serialization, SQLDelight, multiplatform-settings, kotlinx-datetime.
+- Everything goes in `shared/src/commonMain` unless it needs a platform API. No `java.*`, `android.*` or `platform.*` imports in commonMain.
+- Platform differences go behind `PlatformServices` (one implementation in androidMain, one in iosMain). Do not add `expect`/`actual`.
+- Objects are created and connected in `AppGraph`. No DI framework.
+- Layers: ui (Composable + ViewModel) -> domain (use cases, models) -> data (api, repository). Domain has no UI or HTTP imports.
+- ViewModels expose one immutable StateFlow<UiState>. Composables are stateless; anything that must survive rotation or process death uses rememberSaveable.
+- Money and payment: one Idempotency-Key per order attempt, kept with rememberSaveable in PaymentRoute. Ignore taps while processing. A lost payment response is "pending, checking status", never "failed, try again".
+- Server state is the source of truth. The status screen always reads the API.
+- All user-visible text in composeResources/values (en) and values-de. Placeholders are positional (%1$d). No hardcoded colors. Touch targets >= 48dp.
+- Network: every call goes through `ApiClient`. Retry only idempotent requests. Never log request bodies or phone numbers.
+- Telemetry: record through TelemetryRecorder only. No personal data in props. Behavioral events need consent; the recorder enforces it.
+- Recommendation is optional: any failure or timeout means "no badge", never an error screen.
+- Tests go in `shared/src/commonTest` with kotlin.test, coroutines-test, Turbine and Ktor MockEngine (see `FakeServer`). No MockK or JUnit-only APIs. Ask before adding dependencies.

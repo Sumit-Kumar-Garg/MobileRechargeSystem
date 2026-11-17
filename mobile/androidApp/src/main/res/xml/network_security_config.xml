@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Release traffic is HTTPS only. Add a <pin-set> for the API host before release. -->
+    <!-- Debug builds use src/debug/res/xml/network_security_config.xml instead of this file. -->
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

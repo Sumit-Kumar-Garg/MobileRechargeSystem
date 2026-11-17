@@ -11,8 +11,9 @@ This repository holds every part of the system, one folder per project.
 | Folder | What it is | Stack |
 |---|---|---|
 | [`backend/`](backend/README.md) | REST API: plans, orders, payments, top-up provisioning, refunds, notifications, AI advisor | Java 21, Spring Boot 3.3, PostgreSQL, Kafka, Redis |
+| [`mobile/`](mobile/README.md) | Customer app for Android and iOS: screens and logic written once in a shared module | Kotlin Multiplatform, Compose Multiplatform, Ktor |
 
-To add a project (for example a mobile app), create its own top-level folder with its own README, and add a CI
+To add a project, create its own top-level folder with its own README, and add a CI
 workflow under `.github/workflows/` that only runs when that folder changes.
 
 ## Getting started
@@ -23,12 +24,14 @@ cd MobileRechargeSystem/backend
 docker compose up -d
 SPRING_PROFILES_ACTIVE=demo ./mvnw spring-boot:run
 ```
-See [`backend/README.md`](backend/README.md) for the full guide.
+See [`backend/README.md`](backend/README.md) for the full guide. For the app, open `mobile/` in Android Studio and
+follow [`mobile/README.md`](mobile/README.md).
 
 ## Repository layout
 ```
 .github/      CI workflows and code ownership for all projects
 backend/      the backend service
+mobile/       the Android and iOS app (shared, androidApp, iosApp)
 ```
 
 ## License

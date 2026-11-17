@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="number_title">Top up your number</string>
+    <string name="number_hint">Phone number</string>
+    <string name="number_supporting">Example: 0170 1234567 or +49 170 1234567</string>
+    <string name="number_continue">Continue</string>
+    <string name="number_error_invalid">Please enter a valid phone number.</string>
+    <string name="number_error_unsupported">This country is not supported yet.</string>
+    <string name="number_error_limit">You have reached the maximum number of linked numbers.</string>
+
+    <string name="plans_title">Choose a plan</string>
+    <string name="plans_for_number">For %1$s</string>
+    <string name="plan_recommended">Recommended for you</string>
+    <string name="plan_cheaper_alternative">Cheaper option</string>
+    <plurals name="plan_valid_days">
+        <item quantity="one">Valid for %1$d day</item>
+        <item quantity="other">Valid for %1$d days</item>
+    </plurals>
+    <string name="plan_data_mb">%1$s GB data</string>
+    <string name="plan_voice">%1$d min calls</string>
+    <string name="plan_sms">%1$d SMS</string>
+    <string name="plan_select">Select</string>
+    <string name="plans_empty">No plans are available right now.</string>
+
+    <string name="pay_title">Confirm and pay</string>
+    <string name="pay_summary">%1$s for %2$s</string>
+    <string name="pay_method">Payment method (demo)</string>
+    <string name="pay_method_success">Card (approved)</string>
+    <string name="pay_method_decline">Card (declined)</string>
+    <string name="pay_method_timeout">Card (slow bank, no answer)</string>
+    <string name="pay_button">Pay %1$s</string>
+    <string name="pay_processing">Processing payment…</string>
+    <string name="pay_declined">Your card was declined. You can try another payment method.</string>
+    <string name="pay_error_limit">Too many attempts. Please try again later.</string>
+    <string name="pay_error_expired">This order has expired. Please start again.</string>
+
+    <string name="status_title">Your recharge</string>
+    <string name="status_in_progress">We are activating your plan…</string>
+    <string name="status_pending_payment">We are confirming your payment. You will not be charged twice.</string>
+    <string name="status_completed">Recharge successful</string>
+    <string name="status_completed_detail">%1$s is active until %2$s.</string>
+    <string name="status_failed">Payment failed</string>
+    <string name="status_refund">We could not activate your plan. Your money is being refunded.</string>
+    <string name="status_refunded">Your payment was refunded.</string>
+    <string name="status_expired">This order has expired.</string>
+    <string name="status_new_recharge">New recharge</string>
+
+    <string name="banner_offline">You are offline. Connect to continue.</string>
+    <string name="banner_slow">Slow connection. This may take longer than usual.</string>
+    <string name="action_retry">Retry</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_offline">No internet connection.</string>
+    <string name="error_timeout">The request took too long. Please try again.</string>
+
+    <string name="consent_title">Your privacy choices</string>
+    <string name="consent_personalization">Personalized plan recommendations</string>
+    <string name="consent_analytics">Share anonymous usage data to improve the app</string>
+    <string name="consent_save">Save</string>
+</resources>

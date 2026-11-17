@@ -1,5 +1,54 @@
 # Recharge & Top-up Backend
 
+[![CI](https://github.com/Sumit-Kumar-Garg/MobileRechargeSystem/actions/workflows/ci.yml/badge.svg)](https://github.com/Sumit-Kumar-Garg/MobileRechargeSystem/actions/workflows/ci.yml)
+![Java 21](https://img.shields.io/badge/Java-21-orange)
+![Spring Boot 3.3](https://img.shields.io/badge/Spring%20Boot-3.3-6DB33F)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791)
+![Kafka](https://img.shields.io/badge/Apache%20Kafka-231F20)
+![Redis](https://img.shields.io/badge/Redis-DC382D)
+
+The backend for a mobile recharge app. Customers link their phone numbers, browse prepaid plans, pay, and get the
+top-up applied to their number. If a step fails after they've paid, they're refunded automatically.
+
+## Features
+- **Plan catalog:** prepaid plans per market, with validity and benefits, cached for fast browsing
+- **Linked numbers:** customers link up to a set number of phone numbers to their account (encrypted at rest)
+- **Orders and payments:** idempotent orders, a strict order state machine, several payment providers (card and wallet)
+- **Provisioning with automatic refunds:** retries the operator top-up, then refunds the customer if it keeps failing
+- **Reconciliation:** resolves payments whose result was lost, and expires abandoned orders
+- **Notifications:** push, SMS and email driven by Kafka events, with retries and a dead-letter topic
+- **AI recharge advisor:** recommends a plan from the customer's usage, with consent checks and a rules-based fallback
+- **Abuse protection:** per-endpoint rate limits, lockout after repeated declined payments, request size limits
+- **Observability:** Prometheus metrics, OpenTelemetry tracing, Grafana dashboards, client telemetry
+- **Runs as several instances:** database leases for background jobs, shared rate limits in Redis
+
+## Prerequisites
+- JDK 21 (the build rejects JDK 24+)
+- Docker (for Postgres, Kafka, Redis and the integration tests)
+- `jq` and `curl` for the API examples below (optional)
+
+## Quick start
+```bash
+git clone https://github.com/Sumit-Kumar-Garg/MobileRechargeSystem.git && cd MobileRechargeSystem
+docker compose up -d                                  # start postgres, kafka, redis
+SPRING_PROFILES_ACTIVE=demo ./mvnw spring-boot:run    # seed data, mock providers, dev secrets
+```
+Then open http://localhost:8080/swagger-ui.html for the API docs, or run `./scripts/demo-flow.sh` to walk through a
+full recharge.
+
+## Documentation
+- [`ARCHITECTURE.md`](ARCHITECTURE.md): how the system is shaped, the money path, invariants and failure behaviour
+- [`specs/`](specs/README.md): one spec per feature (catalog, orders, payments, refunds, notifications, ...)
+- [`.env.example`](.env.example): every configuration setting with its default
+
+## License
+No license has been chosen yet, so all rights are reserved by default.
+
+---
+
+The rest of this file is the detailed developer guide.
+
+## Overview
 Spring Boot 3.3 / Java 21 / PostgreSQL / Kafka. Modular monolith for the "Recharge & Top-up" self-care app.
 
 Behaviour is specified in [`specs/`](specs/README.md) (spec-driven development: constitution + one spec per
